@@ -20,11 +20,11 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 5001
+localPort = 42243
 externalPort = 3000
 
 [workflows]
-runButton = "Setup and Run"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Setup and Run"
@@ -38,3 +38,27 @@ args = "python setup_migrations.py"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash run_all.sh"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Server"
+
+[[workflows.workflow]]
+name = "Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --workers 2 --worker-class gevent --bind 0.0.0.0:5000 --timeout 0 \"main:create_app()\""
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[agent]
+expertMode = true
